@@ -121,7 +121,7 @@ def plot_sup_dem(seller_num, sup_ranges, buyer_num, dem_ranges, stepmode):
 
 # Defining length of experiment to be 10,800 (simulated) seconds i.e. 3hrs
 start_time = 0
-end_time = 2700 * 4  # allows for three mutations in total occurring every 2880 seconds
+end_time = 2700 * 4  # allows for three mutations in total occurring every 2700 seconds
 k = 4
 wait_time = end_time/(4*k)  # each strategy gets 675 seconds each to ensure that three mutations occur
 
