@@ -136,8 +136,8 @@ demand_schedule = [{'from': start_time, 'to': end_time, 'ranges':
 
 # Introducing the traders to the market
 trader_params = {"k": k, "F": 0.8, "s_min": -1.0, "s_max": +1.0, "wait_time": wait_time}
-sellers_spec = [("PRDE", 5, trader_params), ("ZIP", 5)]  # todo Do i need zip
-seller_num = 10
+sellers_spec = [("PRDE", 30, trader_params)]
+seller_num = 30
 buyers_spec = sellers_spec
 buyer_num = seller_num
 traders_spec = {"sellers": sellers_spec, "buyers": buyers_spec}
