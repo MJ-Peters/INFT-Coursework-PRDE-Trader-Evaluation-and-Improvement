@@ -119,11 +119,11 @@ def plot_sup_dem(seller_num, sup_ranges, buyer_num, dem_ranges, stepmode):
 
 """End of functions from week 8 BSE workshop"""
 
-# Defining length of experiment to be 30 (simulated) days ~2.6e6 seconds with 5 mutation events occurring
+# Defining length of experiment to be 30 (simulated) days ~2.6e6 seconds
 start_time = 0
 end_time = 30 * 24 * 60 * 60  # Converting 30 days to seconds.
 k = 4  # Number of strategies in the population, four is the minimum for DE
-wait_time = end_time/(6*k)  # each strategy gets evaluated for 1.25 days (30hrs) each -> whole set K takes 5 days
+wait_time = 7200  # each strategy gets evaluated for 7200 seconds (2hrs) each -> whole set K takes 8hrs before mutation
 
 # Defining the supply and demand schedule as symmetric with arbitrary range
 sup_range = (50, 150)
@@ -136,13 +136,13 @@ demand_schedule = [{'from': start_time, 'to': end_time, 'ranges':
 
 # Introducing the traders to the market
 trader_params = {"k": k, "F": 0.8, "s_min": -1.0, "s_max": +1.0, "wait_time": wait_time}
-sellers_spec = [("PRDE", 5, trader_params), ("ZIP", 5)]
+sellers_spec = [("PRDE", 5, trader_params), ("ZIP", 5)]  # todo Do i need zip
 seller_num = 10
 buyers_spec = sellers_spec
 buyer_num = seller_num
 traders_spec = {"sellers": sellers_spec, "buyers": buyers_spec}
 
-# Defining the order schedule, interval 10 -> 2,880 trading sessions
+# Defining the order schedule, interval 10 -> ~2.6e5 orders given to each trader over the 30 days
 # drip-poisson time mode is used to more closely simulate a real market
 order_interval = 10
 order_sched = {"sup": supply_schedule, "dem": demand_schedule,
@@ -157,7 +157,7 @@ trial_id = "PRDE_Baseline"
 
 # Number of independent and identically distributed (iid) runs per experiment
 # n >= 30 is advised for parametric tests (like the t-test)
-n = 30
+n = 1
 
 # Producing empty arrays for time and price values to be added to later
 x = np.empty(0)
