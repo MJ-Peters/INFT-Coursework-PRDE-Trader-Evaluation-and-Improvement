@@ -668,18 +668,21 @@ class Trader_PRZI(Trader):
         # if no params specified then defaults to PRZI with strat values in [-1.0,+1.0]
 
         # default parameter values
-        k = 4
-        optimizer = "PRDE" # no optimizer => plain non-adaptive PRZI
-        s_min = -1.0
-        s_max = +1.0
-        params = {"optimizer": optimizer, "k": k, "strat_min": s_min, "strat_max": s_max}
+        #k = 4
+        #optimizer = "PRDE" # no optimizer => plain non-adaptive PRZI
+        #s_min = -1.0
+        #s_max = +1.0
+        #params = {"optimizer": optimizer, "k": k, "strat_min": s_min, "strat_max": s_max}
         
         # did call provide different params?
         if type(params) is dict:
             if 'k' in params:
                 k = params['k']
+                print(params)
             if 'optimizer' in params:
                 optimizer = params['optimizer']
+            if "F" in params:
+                F = params["F"]
             s_min = params['strat_min']
             s_max = params['strat_max']
         
@@ -704,7 +707,7 @@ class Trader_PRZI(Trader):
                          's0_index': self.active_strat,    # s0 starts out as active strat
                          'snew_index': self.k,             # (k+1)th item of strategy list is DE's new strategy
                          'snew_stratval': None,            # assigned later
-                         'F': params["F"]                          # differential weight -- usually between 0 and 2
+                         'F': F                            # differential weight -- usually between 0 and 2
         }
 
         start_time = time
@@ -1601,8 +1604,9 @@ def populate_market(traders_spec, traders, shuffle, verbose):
                     parameters = {'optimizer': 'PRSH', 'k': trader_params['k'],
                                   'strat_min': trader_params['s_min'], 'strat_max': trader_params['s_max']}
                 elif ttype == 'PRDE':
-                    parameters = {'optimizer': 'PRDE', 'k': trader_params['k'],
-                                  'strat_min': trader_params['s_min'], 'strat_max': trader_params['s_max']}
+                    parameters = {'optimizer': 'PRDE', 'k': trader_params['k'], 'F': trader_params['F'],
+                                  'strat_min': trader_params['s_min'], 'strat_max': trader_params['s_max'],
+                                  'wait_time': trader_params['wait_time']}
                 else: # ttype=PRZI
                     parameters = {'optimizer': None, 'k': 1,
                                   'strat_min': trader_params['s_min'], 'strat_max': trader_params['s_max']}
