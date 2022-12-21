@@ -119,11 +119,11 @@ def plot_sup_dem(seller_num, sup_ranges, buyer_num, dem_ranges, stepmode):
 
 """End of functions from week 8 BSE workshop"""
 
-# Defining length of experiment to be 10,800 (simulated) seconds i.e. 3hrs
+# Defining length of experiment to be 30 (simulated) days ~2.6e6 seconds with 5 mutation events occurring
 start_time = 0
-end_time = 2700 * 4  # allows for three mutations in total occurring every 2700 seconds
-k = 4
-wait_time = end_time/(4*k)  # each strategy gets 675 seconds each to ensure that three mutations occur
+end_time = 30 * 24 * 60 * 60  # Converting 30 days to seconds.
+k = 4  # Number of strategies in the population, four is the minimum for DE
+wait_time = end_time/(6*k)  # each strategy gets evaluated for 1.25 days (30hrs) each -> whole set K takes 5 days
 
 # Defining the supply and demand schedule as symmetric with arbitrary range
 sup_range = (50, 150)
