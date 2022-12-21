@@ -119,9 +119,11 @@ def plot_sup_dem(seller_num, sup_ranges, buyer_num, dem_ranges, stepmode):
 
 """End of functions from week 8 BSE workshop"""
 
-# Defining length of experiment to be 28,800 (simulated) seconds i.e. 8 hours
+# Defining length of experiment to be 10,800 (simulated) seconds i.e. 3hrs
 start_time = 0
-end_time = 28800
+end_time = 2700 * 4  # allows for three mutations in total occurring every 2880 seconds
+k = 4
+wait_time = end_time/(4*k)  # each strategy gets 675 seconds each to ensure that three mutations occur
 
 # Defining the supply and demand schedule as symmetric with arbitrary range
 sup_range = (50, 150)
@@ -133,9 +135,9 @@ demand_schedule = [{'from': start_time, 'to': end_time, 'ranges':
                     [dem_range], 'stepmode': stepmode}]
 
 # Introducing the traders to the market
-trader_params = {"k": 4, "s_min": -1.0, "s_max": +1.0}
-sellers_spec = [("PRDE", 25, trader_params)]
-seller_num = 25
+trader_params = {"k": k, "F": 0.8, "s_min": -1.0, "s_max": +1.0, "wait_time": wait_time}
+sellers_spec = [("PRDE", 5, trader_params), ("ZIP", 5)]
+seller_num = 10
 buyers_spec = sellers_spec
 buyer_num = seller_num
 traders_spec = {"sellers": sellers_spec, "buyers": buyers_spec}
