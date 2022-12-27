@@ -17,11 +17,21 @@ startTime = time.time()
 
 
 # Small alteration made to save each market session plot as its own png
-def n_runs_plot_trades(n, trial_id, start_time, end_time, traders_spec, order_sched, k_value):
+def n_runs_plot_trades(n, trial_id, start_time, end_time, traders_spec, order_sched, k_value, x):
 
-    for i in range(1, n):  # Run 0 has already been completed so will start at run 1
-        trialId = trial_id + '_' + "k=" + str(k_value) + "_" + str(i)
-        tdump = open(trialId + '_avg_balance.csv', 'w')
+    for i in range(n):  # Run 0 has already been completed so will start at run 1
+        if x == 1:  # runs 1, 2, 3
+            trialId = trial_id + '_' + "k=" + str(k_value) + "_" + str(i + 1)
+            tdump = open(trialId + '_avg_balance.csv', 'w')
+
+        elif x == 2:  # runs 4, 5, 6
+            trialId = trial_id + '_' + "k=" + str(k_value) + "_" + str(i + 4)
+            tdump = open(trialId + '_avg_balance.csv', 'w')
+
+        elif x == 3:  # runs 7, 8, 9
+            trialId = trial_id + '_' + "k=" + str(k_value) + "_" + str(i + 7)
+            tdump = open(trialId + '_avg_balance.csv', 'w')
+
 
         market_session(trialId, start_time, end_time, traders_spec, order_sched, tdump, dump_all, verbose)
 
@@ -157,7 +167,7 @@ trial_id = "PRDE_Baseline"
 
 # Number of independent and identically distributed (iid) runs per experiment
 # n >= 30 is advised for parametric tests (like the t-test)
-n = 10
+n = 3  # 3 runs are being run 3 times simultaneously -> 9 runs
 
 # Producing empty arrays for time and price values to be added to later
 x = np.empty(0)
@@ -166,14 +176,34 @@ y = np.empty(0)
 # Runs the interval n times from start to finish to plot results and supply/demand chart
 # plot_sup_dem(seller_num, [sup_range], buyer_num, [dem_range], stepmode)  # Same supply/demand as baseline
 
-k1 = multiprocessing.Process(target=n_runs_plot_trades,
-                             args=(n, trial_id, start_time, end_time, traders_spec, order_sched, 5))
+k1_1 = multiprocessing.Process(target=n_runs_plot_trades,
+                             args=(n, trial_id, start_time, end_time, traders_spec, order_sched, 5, 1))
 
-k2 = multiprocessing.Process(target=n_runs_plot_trades,
-                             args=(n, trial_id, start_time, end_time, traders_spec, order_sched, 6))
+k1_2 = multiprocessing.Process(target=n_runs_plot_trades,
+                             args=(n, trial_id, start_time, end_time, traders_spec, order_sched, 5, 2))
 
-k3 = multiprocessing.Process(target=n_runs_plot_trades,
-                             args=(n, trial_id, start_time, end_time, traders_spec, order_sched, 7))
+k1_3 = multiprocessing.Process(target=n_runs_plot_trades,
+                             args=(n, trial_id, start_time, end_time, traders_spec, order_sched, 5, 3))
+
+
+k2_1 = multiprocessing.Process(target=n_runs_plot_trades,
+                             args=(n, trial_id, start_time, end_time, traders_spec, order_sched, 6, 1))
+
+k2_2 = multiprocessing.Process(target=n_runs_plot_trades,
+                             args=(n, trial_id, start_time, end_time, traders_spec, order_sched, 6, 2))
+
+k2_3 = multiprocessing.Process(target=n_runs_plot_trades,
+                             args=(n, trial_id, start_time, end_time, traders_spec, order_sched, 6, 3))
+
+
+k3_1 = multiprocessing.Process(target=n_runs_plot_trades,
+                             args=(n, trial_id, start_time, end_time, traders_spec, order_sched, 7, 1))
+
+k3_2 = multiprocessing.Process(target=n_runs_plot_trades,
+                             args=(n, trial_id, start_time, end_time, traders_spec, order_sched, 7, 2))
+
+k3_3 = multiprocessing.Process(target=n_runs_plot_trades,
+                             args=(n, trial_id, start_time, end_time, traders_spec, order_sched, 7, 3))
 
 if __name__ == "__main__":
     k1.start()
