@@ -132,9 +132,8 @@ supply_schedule = [{'from': start_time, 'to': end_time, 'ranges':
 demand_schedule = [{'from': start_time, 'to': end_time, 'ranges':
                     [dem_range], 'stepmode': stepmode}]
 
-k_vals = [5, 6, 7]
 # Introducing the traders to the market
-trader_params = {"k": 7, "F": 0.8, "s_min": -1.0, "s_max": +1.0, "wait_time": wait_time}
+trader_params = {"k": 6, "F": 0.8, "s_min": -1.0, "s_max": +1.0, "wait_time": wait_time}
 sellers_spec = [("PRDE", 30, trader_params)]
 seller_num = 30
 buyers_spec = sellers_spec
