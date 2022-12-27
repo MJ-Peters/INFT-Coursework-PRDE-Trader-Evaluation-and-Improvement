@@ -179,6 +179,9 @@ if __name__ == "__main__":
     k1.start()
     k2.start()
     k3.start()
+    k1.join()
+    k2.join()
+    k3.join()
 
 executionTime = (time.time() - startTime)
 print("Execution time in seconds: " + str(executionTime))
