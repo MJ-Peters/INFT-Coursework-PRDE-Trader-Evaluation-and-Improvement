@@ -158,7 +158,7 @@ for i in range(3):
 
     # Number of independent and identically distributed (iid) runs per experiment
     # n >= 30 is advised for parametric tests (like the t-test)
-    n = 1
+    n = 10
 
     # Producing empty arrays for time and price values to be added to later
     x = np.empty(0)
