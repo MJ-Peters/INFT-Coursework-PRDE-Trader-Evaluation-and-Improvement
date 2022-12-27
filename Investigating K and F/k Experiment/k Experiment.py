@@ -18,8 +18,8 @@ startTime = time.time()
 # Small alteration made to save each market session plot as its own png
 def n_runs_plot_trades(n, trial_id, start_time, end_time, traders_spec, order_sched, k_value):
 
-    for i in range(n):
-        trialId = trial_id + '_' + "k=" + str(k_value)
+    for i in range(1, n):
+        trialId = trial_id + '_' + "k=" + str(k_value) + "_" + str(i)
         tdump = open(trialId + '_avg_balance.csv', 'w')
 
         market_session(trialId, start_time, end_time, traders_spec, order_sched, tdump, dump_all, verbose)
