@@ -18,7 +18,7 @@ startTime = time.time()
 # Small alteration made to save each market session plot as its own png
 def n_runs_plot_trades(n, trial_id, start_time, end_time, traders_spec, order_sched, k_value):
 
-    for i in range(1, n):
+    for i in range(n):
         trialId = trial_id + '_' + "k=" + str(k_value) + "_" + str(i)
         tdump = open(trialId + '_avg_balance.csv', 'w')
 
@@ -133,7 +133,7 @@ demand_schedule = [{'from': start_time, 'to': end_time, 'ranges':
                     [dem_range], 'stepmode': stepmode}]
 
 # Introducing the traders to the market
-trader_params = {"k": 5, "F": 0.8, "s_min": -1.0, "s_max": +1.0, "wait_time": wait_time}
+trader_params = {"k": 8, "F": 0.8, "s_min": -1.0, "s_max": +1.0, "wait_time": wait_time}
 sellers_spec = [("PRDE", 30, trader_params)]
 seller_num = 30
 buyers_spec = sellers_spec
@@ -163,7 +163,7 @@ y = np.empty(0)
 
 # Runs the interval n times from start to finish to plot results and supply/demand chart
 # plot_sup_dem(seller_num, [sup_range], buyer_num, [dem_range], stepmode)  # Same supply/demand as baseline
-n_runs_plot_trades(n, trial_id, start_time, end_time, traders_spec, order_sched, 6)
+n_runs_plot_trades(n, trial_id, start_time, end_time, traders_spec, order_sched, 8)
 
 executionTime = (time.time() - startTime)
 print("Execution time in seconds: " + str(executionTime))
