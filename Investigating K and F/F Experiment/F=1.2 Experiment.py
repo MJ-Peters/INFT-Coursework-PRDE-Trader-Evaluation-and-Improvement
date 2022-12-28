@@ -163,7 +163,7 @@ y = np.empty(0)
 
 # Runs the interval n times from start to finish to plot results and supply/demand chart
 # plot_sup_dem(seller_num, [sup_range], buyer_num, [dem_range], stepmode)  # Same supply/demand as baseline
-n_runs_plot_trades(n, trial_id, start_time, end_time, traders_spec, order_sched, 1.6)
+n_runs_plot_trades(n, trial_id, start_time, end_time, traders_spec, order_sched, 1.2)
 
 executionTime = (time.time() - startTime)
 print("Execution time in seconds: " + str(executionTime))
