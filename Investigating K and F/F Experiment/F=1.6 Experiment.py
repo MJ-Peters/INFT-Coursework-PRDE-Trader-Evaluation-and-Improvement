@@ -16,7 +16,7 @@ startTime = time.time()
 
 
 # Small alteration made to save each market session plot as its own png
-def n_runs_plot_trades(n, trial_id, start_time, end_time, traders_spec, order_sched, F_value):
+def n_runs(n, trial_id, start_time, end_time, traders_spec, order_sched, F_value):
 
     for i in range(1, n):
         trialId = trial_id + '_' + "F=" + str(F_value) + "_" + str(i)
@@ -26,19 +26,19 @@ def n_runs_plot_trades(n, trial_id, start_time, end_time, traders_spec, order_sc
 
         tdump.close()
 
-        with open(trialId + '_tape.csv', newline='') as csvfile:
-            reader = csv.reader(csvfile)
-            x = np.empty(0)
-            y = np.empty(0)
-
-            for row in reader:
-                time = float(row[1])
-                price = float(row[2])
-                x = np.append(x, time)
-                y = np.append(y, price)
-            # plt.plot(x, y, 'x', color='black');
-            # plt.savefig("output" + "_" + str(i) + ".png")
-            # plt.show()
+        # with open(trialId + '_tape.csv', newline='') as csvfile:
+        #     reader = csv.reader(csvfile)
+        #     x = np.empty(0)
+        #     y = np.empty(0)
+        #
+        #     for row in reader:
+        #         time = float(row[1])
+        #         price = float(row[2])
+        #         x = np.append(x, time)
+        #         y = np.append(y, price)
+        #     plt.plot(x, y, 'x', color='black');
+        #     plt.savefig("output" + "_" + str(i) + ".png")
+        #     plt.show()
 
 
 # def get_order_price(i, sched, n, mode):
@@ -163,7 +163,7 @@ y = np.empty(0)
 
 # Runs the interval n times from start to finish to plot results and supply/demand chart
 # plot_sup_dem(seller_num, [sup_range], buyer_num, [dem_range], stepmode)  # Same supply/demand as baseline
-n_runs_plot_trades(n, trial_id, start_time, end_time, traders_spec, order_sched, 1.6)
+n_runs(n, trial_id, start_time, end_time, traders_spec, order_sched, 1.6)
 
 executionTime = (time.time() - startTime)
 print("Execution time in seconds: " + str(executionTime))

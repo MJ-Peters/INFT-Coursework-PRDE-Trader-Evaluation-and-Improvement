@@ -26,19 +26,19 @@ def n_runs_plot_trades(n, trial_id, start_time, end_time, traders_spec, order_sc
 
         tdump.close()
 
-        with open(trialId + '_tape.csv', newline='') as csvfile:
-            reader = csv.reader(csvfile)
-            x = np.empty(0)
-            y = np.empty(0)
-
-            for row in reader:
-                time = float(row[1])
-                price = float(row[2])
-                x = np.append(x, time)
-                y = np.append(y, price)
-            # plt.plot(x, y, 'x', color='black');
-            # plt.savefig("output" + "_" + str(i) + ".png")
-            # plt.show()
+        # with open(trialId + '_tape.csv', newline='') as csvfile:
+        #     reader = csv.reader(csvfile)
+        #     x = np.empty(0)
+        #     y = np.empty(0)
+        #
+        #     for row in reader:
+        #         time = float(row[1])
+        #         price = float(row[2])
+        #         x = np.append(x, time)
+        #         y = np.append(y, price)
+        #     plt.plot(x, y, 'x', color='black');
+        #     plt.savefig("output" + "_" + str(i) + ".png")
+        #     plt.show()
 
 
 # def get_order_price(i, sched, n, mode):
