@@ -26,6 +26,7 @@ def n_runs(n, trial_id, start_time, end_time, traders_spec, order_sched, F_value
 
         tdump.close()
 
+        # Plotted tape is not necessary for these experiments, it wastes time.
         # with open(trialId + '_tape.csv', newline='') as csvfile:
         #     reader = csv.reader(csvfile)
         #     x = np.empty(0)
