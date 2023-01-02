@@ -1289,6 +1289,116 @@ class Trader_PRZI(Trader):
                 else:
                     sys.exit('FAIL: self.diffevol[\'de_state\'] not recognized')
 
+        elif self.optmzr == 'PRADE':
+            # simple adaptive differential evolution
+
+            # only initiate diff-evol once the active strat has been evaluated for long enough
+            actv_lifetime = time - self.strats[self.active_strat]['start_t']
+            if actv_lifetime >= self.strat_wait_time:
+
+                if self.k < 4:
+                    sys.exit('FAIL: k too small for diffevol')
+
+                if self.diffevol['de_state'] == 'active_s0':
+                    # we've evaluated s0, so now we need to evaluate s_new
+                    self.active_strat = self.diffevol['snew_index']
+                    self.strats[self.active_strat]['start_t'] = time
+                    self.strats[self.active_strat]['profit'] = 0.0
+                    self.strats[self.active_strat]['pps'] = 0.0
+
+                    self.diffevol['de_state'] = 'active_snew'
+
+                elif self.diffevol['de_state'] == 'active_snew':
+                    # now we've evaluated s_0 and s_new, so we can do DE adaptive step
+                    if verbose:
+                        print('PRDE trader %s' % self.tid)
+                    i_0 = self.diffevol['s0_index']
+                    i_new = self.diffevol['snew_index']
+                    fit_0 = self.strats[i_0]['pps']
+                    fit_new = self.strats[i_new]['pps']
+
+                    if verbose:
+                        print('DiffEvol: t=%.1f, i_0=%d, i0fit=%f, i_new=%d, i_new_fit=%f' % (
+                            time, i_0, fit_0, i_new, fit_new))
+
+                    new_iter_success = False
+                    if fit_new >= fit_0:
+                        # new strat did better than old strat0, so overwrite new into strat0
+                        self.strats[i_0]['stratval'] = self.strats[i_new]['stratval']
+                        new_iter_success = True
+                    # do differential evolution
+
+                    # pick four individual strategies at random, but they must be distinct
+                    stratlist = list(range(0, self.k))  # create sequential list of strategy-numbers
+                    random.shuffle(stratlist)  # shuffle the list
+
+                    # s0 is next iteration's candidate for possible replacement
+                    self.diffevol['s0_index'] = stratlist[0]
+
+                    # s1, s2, s3 used in DE to create new strategy, potential replacement for s0
+                    s1_index = stratlist[1]
+                    s2_index = stratlist[2]
+                    s3_index = stratlist[3]
+
+                    # unpack the actual strategy values
+                    s1_stratval = self.strats[s1_index]['stratval']
+                    s2_stratval = self.strats[s2_index]['stratval']
+                    s3_stratval = self.strats[s3_index]['stratval']
+
+                    # this is the differential evolution "adaptive step": create a new individual
+                    if new_iter_success:  # If current is better, evolve more aggressively
+                        self.diffevol["F"] = self.diffevol["F"] * self.diffevol["d"]
+
+                    else:  # If current is worse, evolve less aggressively
+                        self.diffevol["F"] = self.diffevol["F"] / self.diffevol["d"]
+
+                    new_stratval = s1_stratval + self.diffevol['F'] * (s2_stratval - s3_stratval)
+
+
+                    # clip to bounds
+                    new_stratval = max(-1, min(+1, new_stratval))
+
+                    # record it for future use (s0 will be evaluated first, then s_new)
+                    self.strats[self.diffevol['snew_index']]['stratval'] = new_stratval
+
+                    if verbose:
+                        print('DiffEvol: t=%.1f, s0=%d, s1=%d, (s=%+f), s2=%d, (s=%+f), s3=%d, (s=%+f), sNew=%+f' %
+                              (time, self.diffevol['s0_index'],
+                               s1_index, s1_stratval, s2_index, s2_stratval, s3_index, s3_stratval, new_stratval))
+
+                    # DC's intervention for fully converged populations
+                    # is the stddev of the strategies in the population equal/close to zero?
+                    sum = 0.0
+                    for s in range(self.k):
+                        sum += self.strats[s]['stratval']
+                    strat_mean = sum / self.k
+                    sumsq = 0.0
+                    for s in range(self.k):
+                        diff = self.strats[s]['stratval'] - strat_mean
+                        sumsq += (diff * diff)
+                    strat_stdev = math.sqrt(sumsq / self.k)
+                    if verbose:
+                        print('t=,%.1f, MeanStrat=, %+f, stdev=,%f' % (time, strat_mean, strat_stdev))
+                    if strat_stdev < 0.0001:
+                        # this population has converged
+                        # mutate one strategy at random
+                        randindex = random.randint(0, self.k - 1)
+                        self.strats[randindex]['stratval'] = random.uniform(-1.0, +1.0)
+                        if verbose:
+                            print('Converged pop: set strategy %d to %+f' % (
+                                randindex, self.strats[randindex]['stratval']))
+
+                    # set up next iteration: first evaluate s0
+                    self.active_strat = self.diffevol['s0_index']
+                    self.strats[self.active_strat]['start_t'] = time
+                    self.strats[self.active_strat]['profit'] = 0.0
+                    self.strats[self.active_strat]['pps'] = 0.0
+
+                    self.diffevol['de_state'] = 'active_s0'
+
+                else:
+                    sys.exit('FAIL: self.diffevol[\'de_state\'] not recognized')
+
         elif self.optmzr is None:
             # this is PRZI -- nonadaptive, no optimizer, nothing to change here.
             pass
