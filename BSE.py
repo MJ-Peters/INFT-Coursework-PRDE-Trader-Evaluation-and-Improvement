@@ -683,32 +683,37 @@ class Trader_PRZI(Trader):
                 optimizer = params['optimizer']
             if "F" in params:
                 F = params["F"]
+            if "f" in params:
+                f = params["f"]
+            else:
+                f = 1  # d = 1 makes PRADE act like PRDE with no dynamic adjustments to F
             s_min = params['strat_min']
             s_max = params['strat_max']
-        
-        self.optmzr = optimizer     # this determines whether it's PRZI, PRSH, or PRDE
-        self.k = k                  # number of sampling points (cf number of arms on a multi-armed-bandit, or pop-size)
-        self.theta0 = 100           # threshold-function limit value
-        self.m = 4                  # tangent-function multiplier
-        self.strat_wait_time = params["wait_time"]     # how many secs do we give any one strat before switching?
-        self.strat_range_min = s_min    # lower-bound on randomly-assigned strategy-value
-        self.strat_range_max = s_max    # upper-bound on randomly-assigned strategy-value
-        self.active_strat = 0       # which of the k strategies are we currently playing? -- start with 0
-        self.prev_qid = None        # previous order i.d.
-        self.strat_eval_time = self.k * self.strat_wait_time   # time to cycle through evaluating all k strategies
+
+        self.optmzr = optimizer  # this determines whether it's PRZI, PRSH, or PRDE
+        self.k = k  # number of sampling points (cf number of arms on a multi-armed-bandit, or pop-size)
+        self.theta0 = 100  # threshold-function limit value
+        self.m = 4  # tangent-function multiplier
+        self.strat_wait_time = params["wait_time"]  # how many secs do we give any one strat before switching?
+        self.strat_range_min = s_min  # lower-bound on randomly-assigned strategy-value
+        self.strat_range_max = s_max  # upper-bound on randomly-assigned strategy-value
+        self.active_strat = 0  # which of the k strategies are we currently playing? -- start with 0
+        self.prev_qid = None  # previous order i.d.
+        self.strat_eval_time = self.k * self.strat_wait_time  # time to cycle through evaluating all k strategies
         self.last_strat_change_time = time  # what time did we last change strategies?
-        self.profit_epsilon = 0.0 * random.random()    # minimum profit-per-sec difference between strategies that counts
-        self.strats = []            # strategies awaiting initialization
-        self.pmax = None            # this trader's estimate of the maximum price the market will bear
-        self.pmax_c_i = math.sqrt(random.randint(1,10))  # multiplier coefficient when estimating p_max
+        self.profit_epsilon = 0.0 * random.random()  # minimum profit-per-sec difference between strategies that counts
+        self.strats = []  # strategies awaiting initialization
+        self.pmax = None  # this trader's estimate of the maximum price the market will bear
+        self.pmax_c_i = math.sqrt(random.randint(1, 10))  # multiplier coefficient when estimating p_max
         self.mapper_outfile = None
         # differential evolution parameters all in one dictionary
-        self.diffevol = {'de_state': 'active_s0',          # initial state: strategy 0 is active (being evaluated)
-                         's0_index': self.active_strat,    # s0 starts out as active strat
-                         'snew_index': self.k,             # (k+1)th item of strategy list is DE's new strategy
-                         'snew_stratval': None,            # assigned later
-                         'F': F                            # differential weight -- usually between 0 and 2
-        }
+        self.diffevol = {'de_state': 'active_s0',  # initial state: strategy 0 is active (being evaluated)
+                         's0_index': self.active_strat,  # s0 starts out as active strat
+                         'snew_index': self.k,  # (k+1)th item of strategy list is DE's new strategy
+                         'snew_stratval': None,  # assigned later
+                         'F': F,  # differential weight -- usually between 0 and 2
+                         "f": f  # Scaling factor to adjust differential weight
+                         }
 
         start_time = time
         profit = 0.0
@@ -728,6 +733,9 @@ class Trader_PRZI(Trader):
                     # simple stochastic hill climber: cluster other strats around strat_0
                     strategy = self.mutate_strat(self.strats[0]['stratval'], 'gauss')     # mutant of strats[0]
                 elif self.optmzr == 'PRDE':
+                    # differential evolution: seed initial strategies across whole space
+                    strategy = self.mutate_strat(self.strats[0]['stratval'], 'uniform_bounded_range')
+                elif self.optmzr == 'PRADE':
                     # differential evolution: seed initial strategies across whole space
                     strategy = self.mutate_strat(self.strats[0]['stratval'], 'uniform_bounded_range')
                 else:
@@ -1211,7 +1219,7 @@ class Trader_PRZI(Trader):
                 elif self.diffevol['de_state'] == 'active_snew':
                     # now we've evaluated s_0 and s_new, so we can do DE adaptive step
                     if verbose:
-                        print('PRDE trader %s' % self.tid)
+                        print('A trader %s' % self.tid)
                     i_0 = self.diffevol['s0_index']
                     i_new = self.diffevol['snew_index']
                     fit_0 = self.strats[i_0]['pps']
@@ -1311,7 +1319,7 @@ class Trader_PRZI(Trader):
                 elif self.diffevol['de_state'] == 'active_snew':
                     # now we've evaluated s_0 and s_new, so we can do DE adaptive step
                     if verbose:
-                        print('PRDE trader %s' % self.tid)
+                        print('PRADE trader %s' % self.tid)
                     i_0 = self.diffevol['s0_index']
                     i_new = self.diffevol['snew_index']
                     fit_0 = self.strats[i_0]['pps']
@@ -1346,11 +1354,11 @@ class Trader_PRZI(Trader):
                     s3_stratval = self.strats[s3_index]['stratval']
 
                     # this is the differential evolution "adaptive step": create a new individual
-                    if new_iter_success:  # If current is better, evolve more aggressively
-                        self.diffevol["F"] = self.diffevol["F"] * self.diffevol["d"]
+                    if new_iter_success:  # If new is better, evolve more aggressively
+                        self.diffevol["F"] = self.diffevol["F"] * self.diffevol["f"]
 
-                    else:  # If current is worse, evolve less aggressively
-                        self.diffevol["F"] = self.diffevol["F"] / self.diffevol["d"]
+                    else:  # If new is worse, evolve less aggressively
+                        self.diffevol["F"] = self.diffevol["F"] / (max(0.9 * self.diffevol["f"], 1.05))
 
                     new_stratval = s1_stratval + self.diffevol['F'] * (s2_stratval - s3_stratval)
 
@@ -1686,6 +1694,8 @@ def populate_market(traders_spec, traders, shuffle, verbose):
             return Trader_PRZI('PRSH', name, balance, parameters, time0)
         elif robottype == 'PRDE':
             return Trader_PRZI('PRDE', name, balance, parameters, time0)
+        elif robottype == "PRADE":
+            return Trader_PRZI('PRADE', name, balance, parameters, time0)
         else:
             sys.exit('FATAL: don\'t know robot type %s\n' % robottype)
 
@@ -1704,7 +1714,7 @@ def populate_market(traders_spec, traders, shuffle, verbose):
     def unpack_params(trader_params, mapping):
         # unpack the parameters for PRZI-family of strategies
         parameters = None
-        if ttype == 'PRSH' or ttype == 'PRDE' or ttype == 'PRZI':
+        if ttype == 'PRSH' or ttype == 'PRDE' or ttype == 'PRZI' or ttype == "PRADE":
             # parameters matter...
             if mapping:
                 parameters = 'landscape-mapper'
@@ -1717,6 +1727,10 @@ def populate_market(traders_spec, traders, shuffle, verbose):
                     parameters = {'optimizer': 'PRDE', 'k': trader_params['k'], 'F': trader_params['F'],
                                   'strat_min': trader_params['s_min'], 'strat_max': trader_params['s_max'],
                                   'wait_time': trader_params['wait_time']}
+                elif ttype == "PRADE":
+                    parameters = {'optimizer': 'PRADE', 'k': trader_params['k'], 'F': trader_params['F'],
+                                  "f": trader_params["f"], 'strat_min': trader_params['s_min'],
+                                  'strat_max': trader_params['s_max'], 'wait_time': trader_params['wait_time']}
                 else: # ttype=PRZI
                     parameters = {'optimizer': None, 'k': 1,
                                   'strat_min': trader_params['s_min'], 'strat_max': trader_params['s_max']}
@@ -1988,7 +2002,7 @@ def market_session(sess_id, starttime, endtime, trader_spec, order_schedule, avg
             trader = trdrs[t]
 
             # print('PRSH/PRDE recording, t=%s' % trader)
-            if trader.ttype == 'PRSH' or trader.ttype == 'PRDE':
+            if trader.ttype == 'PRSH' or trader.ttype == 'PRDE' or trader.ttype == "PRADE":
                 line_str += 'id=,%s, %s,' % (trader.tid, trader.ttype)
 
                 # line_str += 'bal=$,%f, n_trades=,%d, n_strats=,2, ' % (trader.balance, trader.n_trades)
