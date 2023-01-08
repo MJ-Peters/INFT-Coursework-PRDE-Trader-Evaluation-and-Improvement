@@ -1432,7 +1432,7 @@ class Trader_PRZI(Trader):
                 elif self.diffevol['de_state'] == 'active_snew':
                     # now we've evaluated s_0 and s_new, so we can do DE adaptive step
                     if verbose:
-                        print('PRADE trader %s' % self.tid)
+                        print('PRADE2 trader %s' % self.tid)
                     i_0 = self.diffevol['s0_index']
                     i_new = self.diffevol['snew_index']
                     fit_0 = self.strats[i_0]['pps']
@@ -1823,7 +1823,7 @@ def populate_market(traders_spec, traders, shuffle, verbose):
         elif robottype == "PRADE":
             return Trader_PRZI('PRADE', name, balance, parameters, time0)
         elif robottype == "PRADE2":
-            return Trader_PRZI('PRADE', name, balance, parameters, time0)
+            return Trader_PRZI('PRADE2', name, balance, parameters, time0)
         else:
             sys.exit('FATAL: don\'t know robot type %s\n' % robottype)
 
