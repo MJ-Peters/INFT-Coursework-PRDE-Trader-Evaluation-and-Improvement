@@ -13,6 +13,7 @@ similar results; PRADE demonstrated its adaptability by significantly outperform
 further to try and improve its performance: the rand/1 DE algorithm was swapped to the current-to-rand/1 algorithm. This resulted in
 a much worse trader agent than the original rand/1 PRADE by a significant margin.
 
+# Bristol Stock Exchange
 GitHub page for BSE by Dave Cliff, the simulated financial exchange upon which these experiments were run: https://github.com/davecliff/BristolStockExchange
 
 The research paper written by Dave Cliff about BSE can be found using the citation below:
